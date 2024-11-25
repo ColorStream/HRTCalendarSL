@@ -45,10 +45,7 @@ def gera_calendario():
                 ml_total = float(values['vol_total'])
                 concentracao = float(values['concentracao'])
                 intervalo = float(values['intervalo'])
-                data_inicio_str = values['inicio'] 
-
-                # Converter data de início para datetime
-                data_inicio = datetime.strptime(data_inicio_str, "%d/%m/%Y")
+                data_inicio_str = datetime.strptime(values['inicio'], "%d/%m/%Y")
             except ValueError:
                 sg.popup("Erro: Verifique os valores inseridos. Certifique-se de que são números válidos e a data está no formato dd/mm/yyyy.")
                 continue
@@ -99,7 +96,7 @@ def gera_calendario():
             ws['B6'] = intervalo
 
             ws['A7'] = "Data de início"
-            ws['B7'] = data_inicio
+            ws['B7'] = data_inicio_str
             ws['C7'] = "=b4-b7"
             ws['A8'] = "Vai durar:"
             ws['B8'] = "=$C$4/($B$5/$E$4)"
@@ -128,7 +125,6 @@ def gera_calendario():
             print("-" * 80)
 
             # Variáveis de controle
-            data_inicio = datetime.strptime("16/06/2023", "%d/%m/%Y")
             dose = 5.6
             concentracao = 40.0
             intervalo = 5  # Intervalo de dias
@@ -141,7 +137,7 @@ def gera_calendario():
             # Loop para preencher as linhas
             while ml_total > 0:
                 # Calcular valores
-                data_atual = data_inicio + timedelta(days=dias_corridos)
+                data_atual = data_inicio_str + timedelta(days=dias_corridos)
                 ml_dose = dose / concentracao
                 ml_restante = round(ml_total, 2) - (dose / concentracao) # mL restante
                 ml_total -= ml_dose  # Atualizar mL restante
