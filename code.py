@@ -3,10 +3,7 @@ import os
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from datetime import datetime, timedelta
-from colorama import Fore, init
 import time
-
-init(autoreset=True)
 
 def gera_calendario():
 
@@ -52,9 +49,6 @@ def gera_calendario():
             except ValueError:
                 sg.popup("Erro: Verifique os valores inseridos. Certifique-se de que são números válidos e a data está no formato dd/mm/yyyy.")
                 continue
-
-                # Obter o caminho da pasta Downloads
-                pasta_downloads = os.path.join(os.path.expanduser("~"), "Downloads")
 
             # Criar planilha
             wb = Workbook()
@@ -167,7 +161,7 @@ def gera_calendario():
 
                 # Imprimir no terminal
                 print(
-                    Fore.MAGENTA + f"{aplicacao:<12}{data_atual.strftime('%A'):<15}{data_atual.strftime('%d/%m/%Y'):<12}"
+                    f"{aplicacao:<12}{data_atual.strftime('%A'):<15}{data_atual.strftime('%d/%m/%Y'):<12}"
                     f"{ml_restante:<15}{dias_corridos:<15}{round(dias_corridos / 30, 2):<8}{lado_atual:<10}"
                 )
 
@@ -189,6 +183,6 @@ def gera_calendario():
 
             # Salvar o arquivo
             wb.save(f"TH {nome_usr}.xlsx")
-            print(Fore.GREEN + "Calendário criado com sucesso!")
+            print("Calendário criado com sucesso!")
     
 gera_calendario()
