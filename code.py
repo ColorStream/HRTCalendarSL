@@ -13,16 +13,17 @@ def gera_calendario():
     sg.theme('DarkPurple')
 
     # Janela principal
-    layout = [  [sg.Text('Criador de calendário para TH')],
-                [sg.Text('Seu nome: '), sg.InputText(key='nome')],
-                [sg.Text('Seu éster: '), sg.InputText(key='ester')],
-                [sg.Text('Sua dose em mg: '), sg.InputText(key='dose')],
-                [sg.Text('Seu volume total em mL: '), sg.InputText(key='vol_total')],
-                [sg.Text('Concentração do frasco em mg/ml: '), sg.InputText(key='concentracao')],
-                [sg.Text('Intervalo das doses em dias: '), sg.InputText(key='intervalo')],
-                [sg.Text('Data de início: '), sg.InputText(key='inicio')],
-                [sg.Button('Gerar'), sg.Button('Limpar'), sg.Button('Cancelar')],
-                [sg.Output(s=(75, 10))]
+    layout = [  
+        [sg.Text('Criador de calendário para TH')],
+        [sg.Text('Seu nome: '), sg.InputText(key='nome')],
+        [sg.Text('Seu éster: '), sg.InputText(key='ester')],
+        [sg.Text('Sua dose em mg: '), sg.InputText(key='dose')],
+        [sg.Text('Seu volume total em mL: '), sg.InputText(key='vol_total')],
+        [sg.Text('Concentração do frasco em mg/ml: '), sg.InputText(key='concentracao')],
+        [sg.Text('Intervalo das doses em dias: '), sg.InputText(key='intervalo')],
+        [sg.Text('Data de início (dd/mm/yyyy): '), sg.InputText(key='inicio')],
+        [sg.Button('Gerar'), sg.Button('Limpar'), sg.Button('Cancelar')],
+        [sg.Output(s=(75, 10))]
     ]
 
     window = sg.Window('Criador de calendário para TH injetável', layout, font=("Bookman Old Style", 16))
@@ -37,21 +38,17 @@ def gera_calendario():
 
         if event == 'Gerar':
             try:
-            
                 # Entrada do usuário
                 nome_usr = values['nome']
                 ester = values['ester']
                 dose = float(values['dose'])
                 ml_total = float(values['vol_total'])
                 concentracao = float(values['concentracao'])
-                intervalo = float(values['intervalo'])
-                data_inicio_str = datetime.strptime(values['inicio'], "%d/%m/%Y")
+                intervalo = int(values['intervalo'])
+                data_inicio = datetime.strptime(values['inicio'], "%d/%m/%Y")
             except ValueError:
                 sg.popup("Erro: Verifique os valores inseridos. Certifique-se de que são números válidos e a data está no formato dd/mm/yyyy.")
                 continue
-
-                # Obter o caminho da pasta Downloads
-                pasta_downloads = os.path.join(os.path.expanduser("~"), "Downloads")
 
             # Criar planilha
             wb = Workbook()
@@ -78,9 +75,8 @@ def gera_calendario():
             ws['B2'].alignment = center_align
 
             # Primeiras linhas
-
             ws['A4'] = "Hoje:"
-            ws['B4'] = "=today()"
+            ws['B4'] = "=TODAY()"  # Fórmula para a data atual no Excel
             ws['B4'].number_format = "DD/MM/YYYY"
             ws['C4'] = ml_total
             ws['D4'] = "mL"
@@ -89,102 +85,99 @@ def gera_calendario():
 
             ws['A5'] = "Dose (mg)"
             ws['B5'] = dose
-            ws['C5'] = dose/concentracao
+            ws['C5'] = dose / concentracao  # Cálculo da dose em mL
             ws['D5'] = "mL"
 
             ws['A6'] = "Intervalo:"
             ws['B6'] = intervalo
 
             ws['A7'] = "Data de início"
-            ws['B7'] = data_inicio_str
-            ws['C7'] = "=b4-b7"
+            ws['B7'] = data_inicio.strftime("%d/%m/%Y")  # Exibir data de início formatada
+
             ws['A8'] = "Vai durar:"
             ws['B8'] = "=$C$4/($B$5/$E$4)"
 
-            # Estilos
-            header_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")  # Azul claro
-            font_header = Font(bold=True, color="000000", size=12)
-            font_row = Font(name="Arial", size=10)  # Fonte das linhas
-            center_align = Alignment(horizontal="center", vertical="center")
-            thin_border = Border(
-                left=Side(style="thin"), right=Side(style="thin"),
-                top=Side(style="thin"), bottom=Side(style="thin")
-            )
-
             # Cabeçalhos
-            headers = ["Dia", "mL", "Dias corridos", "Meses", "Lado", "Aplicações"]
+            headers = ["Data", "mL Restante", "Dias Corridos", "Meses", "Lado", "Aplicações"]
             for col_num, header in enumerate(headers, start=2):
                 cell = ws.cell(row=12, column=col_num, value=header)
                 cell.fill = header_fill
-                cell.font = font_header
+                cell.font = Font(bold=True, size=12)
                 cell.alignment = center_align
-                cell.border = thin_border
-
-            # Imprimir cabeçalhos no terminal
-            print(f"{'Aplicação':<12}{'Dia':<15}{'Data':<12}{'mL Restante':<15}{'Dias Corridos':<15}{'Meses':<8}{'Lado':<10}")
-            print("-" * 80)
 
             # Variáveis de controle
-            dose = 5.6
-            concentracao = 40.0
-            intervalo = 5  # Intervalo de dias
-            ml_total = 10.0  # Total de mL inicial
-            linha_inicial = 13
+            linha_atual = 13
             aplicacao = 1
             lado_atual = "Esquerdo"
             dias_corridos = 0
+            ml_restante = ml_total
 
             # Loop para preencher as linhas
-            while ml_total > 0:
-                # Calcular valores
-                data_atual = data_inicio_str + timedelta(days=dias_corridos)
+            while ml_restante >= (dose / concentracao):
+                data_aplicacao = data_inicio + timedelta(days=dias_corridos)
                 ml_dose = dose / concentracao
-                ml_restante = round(ml_total, 2) - (dose / concentracao) # mL restante
-                ml_total -= ml_dose  # Atualizar mL restante
 
-                # Linha no Excel
-                linha_atual = linha_inicial + aplicacao - 1
-                ws[f"A{linha_atual}"] = data_atual.strftime("%A")  # Dia da semana
-                ws[f"B{linha_atual}"] = data_atual.strftime("%d/%m/%Y")  # Data
-                ws[f"D{linha_atual}"] = dias_corridos  # Dias corridos
-                ws[f"C{linha_atual}"] = ml_restante  # mL Restante
-                ws[f"E{linha_atual}"] = round(dias_corridos / 30, 2)  # Meses
-                ws[f"F{linha_atual}"] = lado_atual  # Lado
-                ws[f"G{linha_atual}"] = aplicacao  # Aplicações
-
-                # Aplicar estilo na linha
-                row_fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid") if aplicacao % 2 == 0 else PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-                for col in "ABCDEFG":
-                    cell = ws[f"{col}{linha_atual}"]
-                    cell.font = font_row
-                    cell.alignment = center_align
-                    cell.fill = row_fill
-                    cell.border = thin_border
-
-                # Imprimir no terminal
                 print(
-                    Fore.MAGENTA + f"{aplicacao:<12}{data_atual.strftime('%A'):<15}{data_atual.strftime('%d/%m/%Y'):<12}"
-                    f"{ml_restante:<15}{dias_corridos:<15}{round(dias_corridos / 30, 2):<8}{lado_atual:<10}"
+                f"{aplicacao:<12}{data_aplicacao.strftime('%A'):<15}"
+                f"{data_aplicacao.strftime('%d/%m/%Y'):<12}{round(ml_restante, 2):<15}"
+                f"{dias_corridos:<15}{round(dias_corridos / 30, 2):<8}{lado_atual:<10}"
                 )
 
+                # Preencher os dados na planilha
+                ws.cell(row=linha_atual, column=1, value=data_aplicacao.strftime("%A"))  # Dia
+                ws.cell(row=linha_atual, column=2, value=data_aplicacao.strftime("%d/%m/%Y"))  # Data
+                ws.cell(row=linha_atual, column=3, value=round(ml_restante, 2))  # mL restante
+                ws.cell(row=linha_atual, column=4, value=dias_corridos)  # Dias corridos
+                ws.cell(row=linha_atual, column=5, value=round(dias_corridos / 30, 2))  # Meses
+                ws.cell(row=linha_atual, column=6, value=lado_atual)  # Lado
+                ws.cell(row=linha_atual, column=7, value=aplicacao)  # Aplicações
+
                 # Atualizar variáveis
-                lado_atual = "Direito" if lado_atual == "Esquerdo" else "Esquerdo"
-                ml_restante -= (dose / concentracao)
+                ml_restante -= ml_dose
                 dias_corridos += intervalo
+                lado_atual = "Direito" if lado_atual == "Esquerdo" else "Esquerdo"
                 aplicacao += 1
                 linha_atual += 1
 
+            # Definir borda fina para todas as células
+                thin_border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+                )
+
+            # Definir borda inferior para as células
+            thin_border_bottom = Border(
+                bottom=Side(style="thin")
+            )
+
+            # Aplicar bordas apenas às células de dados
+            for row in ws.iter_rows(min_row=13, max_row=linha_atual - 1, min_col=2, max_col=7):
+                for cell in row:
+                    cell.border = thin_border_bottom
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+
+            # ALinhamento central
+
+            for row in ws.iter_rows(min_row=1, max_row=linha_atual - 1, min_col=1, max_col=7):
+                for cell in row:
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+
             # Ajustar larguras das colunas
-            for column in ws.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                for cell in column:
-                    if cell.value:
-                        max_length = max(max_length, len(str(cell.value)))
-                ws.column_dimensions[column_letter].width = max_length + 2
+            for col in ws.columns:
+                max_length = max(len(str(cell.value or "")) for cell in col)
+                col_letter = col[0].column_letter
+                ws.column_dimensions[col_letter].width = max_length + 2
 
             # Salvar o arquivo
-            wb.save(f"TH {nome_usr}.xlsx")
-            print(Fore.GREEN + "Calendário criado com sucesso!")
+            pasta_downloads = os.path.join(os.path.expanduser("~"), "Downloads")
+            arquivo_saida = os.path.join(pasta_downloads, f"TH {nome_usr}.xlsx")
+
+            try:
+                wb.save(arquivo_saida)
+                sg.popup(f"Calendário criado com sucesso!\nArquivo salvo em: {arquivo_saida}")
+            except PermissionError:
+                sg.popup("Erro: Não foi possível salvar o arquivo. Verifique se ele está aberto e tente novamente.")
     
 gera_calendario()
