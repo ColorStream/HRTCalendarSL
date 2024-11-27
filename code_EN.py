@@ -86,13 +86,13 @@ def gera_calendario():
             ws['C5'] = dose / concentracao  # Cálculo da dose em mL
             ws['D5'] = "mL"
 
-            ws['A6'] = "Intervalo:"
+            ws['A6'] = "Interval:"
             ws['B6'] = intervalo
 
-            ws['A7'] = "Data de início"
+            ws['A7'] = "Start date"
             ws['B7'] = data_inicio.strftime("%d/%m/%Y")
 
-            ws['A8'] = "Vai durar:"
+            ws['A8'] = "Lasts:"
             ws['B8'] = "=$C$4/($B$5/$E$4)"
             ws['C8'] = "Doses"
 
