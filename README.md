@@ -1,25 +1,7 @@
-# Calendário de TH / HRT Calendar
+This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions. This will be hosted using Streamlit Community Cloud when I'm done, hopefully. 
 
-EN:
-
-This project aims to help you create an injectable hormone application calendar. Feel free to use it, the program is very intuitive.
-It's in version 1.0, and I plan to add more features in the future. Contributions and suggestions are welcome.
-
-PT:
-
-Esse projeto visa ajudar a criar um calendário de aplicação hormonal do tipo injetável. Sinta-se livre para usar, o programa é bem intuitivo.
-Está na versão 1.0, e pretendo adicionar mais no futuro. Contribuições e sugestões são bem vindas.
 
 This project is licensed under the terms of the GNU General Public License v3. See the LICENSE file for more details.
-Este projeto está licenciado sob os termos da Licença Pública Geral GNU v3. Consulte o arquivo LICENSE para mais detalhes.
-
-Images:
-![image](https://github.com/user-attachments/assets/5f0c88ab-8dd1-4200-b018-5ca6631a1af3)
-![image](https://github.com/user-attachments/assets/40ddaf72-1790-4c70-8218-e2f26fe5dbfc)
-![image](https://github.com/user-attachments/assets/a693bfb5-2557-4759-85e0-65330c25249a)
-
-
-
 
 Copyright (C) 2025
 
