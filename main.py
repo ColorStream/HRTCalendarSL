@@ -3,11 +3,12 @@ import streamlit as st
 from datetime import timedelta, date
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
+from openpyxl.styles import PatternFill
 import pandas as pd
 import os
 
 class Form:
-    def __init__(self, name=None, hrt=None, interval=None, start_date=None, dose=None, dosetype=["mg", "mL"], total_volume=None, concentration=None, metadata=None, calendar=None):
+    def __init__(self, name=None, hrt=None, interval=None, start_date=None, dose=None, dosetype=["mg", "mL"], total_volume=None, concentration=None):
         self.name = name
         self.hrt = hrt
         self.interval = interval
@@ -16,9 +17,6 @@ class Form:
         self.dosetype = dosetype
         self.total_volume = total_volume
         self.concentration = concentration
-
-        self.metadata = metadata
-        self.calendar = calendar
 
     def create_inputs(self, date_format):
         self.name = st.text_input("Your Name", value=self.name)
@@ -51,7 +49,6 @@ class Form:
             "Concentration (mg/mL)": f"{self.concentration} mg/mL"
         }
         metadata_df = pd.DataFrame([metadata])
-        self.metadata = metadata_df
         return metadata_df
     
     def validate_fields(self):
@@ -102,12 +99,10 @@ class Form:
         #convert the dictionary to a DataFrame and display
         metadata = self.generate_metadata(date_format, injection_count)
         df = pd.DataFrame(data_dict)
-        self.calendar = df
-        st.dataframe(metadata)
-        st.dataframe(df)
+        return metadata, df
 
-    def export_to_excel(self, filename="hrt_calendar.xlsx"):
-        if self.metadata is None or self.calendar is None:
+def export_to_excel(metadata_df, calendar_df, filename="hrt_calendar.xlsx"):
+        if metadata_df is None or calendar_df is None:
             st.error("Metadata or Calendar is not initialized.")
             return
 
@@ -116,16 +111,36 @@ class Form:
         ws = wb.active
 
         try:
-            # Write metadata to Excel (self.metadata should be a DataFrame)
-            for r_idx, row in enumerate(dataframe_to_rows(self.metadata, index=False, header=False), 1):
+            # Write metadata to Excel
+            for r_idx, row in enumerate(dataframe_to_rows(metadata_df, index=False, header=True), 1):
+                for c_idx, value in enumerate(row, 1):
+                    ws.cell(row=r_idx, column=c_idx, value=value)
+            
+            header_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+            for cell in ws[1]: #color metadata header
+                cell.fill = header_fill
+
+            # Write calendar data to Excel
+            calendar_start_row = len(metadata_df) + 3  # Leave 2 rows gap between metadata and calendar
+            for r_idx, row in enumerate(dataframe_to_rows(calendar_df, index=False, header=True), calendar_start_row):
                 for c_idx, value in enumerate(row, 1):
                     ws.cell(row=r_idx, column=c_idx, value=value)
 
-            # Write calendar data to Excel (self.calendar should be a DataFrame)
-            calendar_start_row = len(self.metadata) + 3  # Leave 2 rows gap between metadata and calendar
-            for r_idx, row in enumerate(dataframe_to_rows(self.calendar, index=False, header=True), calendar_start_row):
-                for c_idx, value in enumerate(row, 1):
-                    ws.cell(row=r_idx, column=c_idx, value=value)
+            for cell in ws[calendar_start_row]: #color calendar header
+                cell.fill = header_fill
+            
+            # This method is taken from here: https://github.com/Loke-60000/Archaeological-Sites-Sorter/blob/master/app.py
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter  # Get the column letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = max_length + 2  # Add some padding
+                ws.column_dimensions[column].width = adjusted_width
 
             # Save the file to Downloads folder
             download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -139,7 +154,6 @@ class Form:
         except Exception as e:
             st.error(f"An unexpected error occurred: {e}")
 
-
 def get_date_format(date_format):
     if date_format == "DD/MM/YYYY":
         format = "%d/%m/%Y"
@@ -152,7 +166,7 @@ def get_date_format(date_format):
 def main():
     st.sidebar.title("HRT Calendar Generator")
     tab = st.sidebar.radio("Choose Calculation Method", ["By dosage in mg", "By dosage in mL"])
-    date_format = st.sidebar.radio("Choose Date Format", ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY/MM/DD"])
+    date_format = st.sidebar.radio("Choose Date Format", ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY/MM/DD"]) #apologies for americanizing this. 
     starting_side = st.sidebar.radio("Choose Starting Side", ["Left", "Right"])
 
     if tab == "By dosage in mg":
@@ -164,10 +178,17 @@ def main():
                 st.warning("Please fill out all fields properly before generating the calendar.")
             else:
                 date_format = get_date_format(date_format)
-                form.generate_calendar(date_format=date_format, starting_side=starting_side)
-                #if st.button("Export to Excel"):
-                    #st.write(f"{all(form.metadata, form.calendar)}")
-                    #form.export_to_excel()
+                metadata, calendar = form.generate_calendar(date_format=date_format, starting_side=starting_side)
+                st.dataframe(metadata)
+                st.dataframe(calendar)
+                
+        if st.button("Export to Excel"):
+            if not form.validate_fields():
+                st.warning("Please fill out all fields properly before generating the calendar.")
+            else:
+                date_format = get_date_format(date_format)
+                metadata, calendar = form.generate_calendar(date_format=date_format, starting_side=starting_side)
+                export_to_excel(metadata_df=metadata, calendar_df=calendar)
         
 
     elif tab == "By dosage in mL":
@@ -179,7 +200,17 @@ def main():
                 st.warning("Please fill out all fields properly before trying to generate the calendar.")
             else:
                 date_format = get_date_format(date_format)
-                form.generate_calendar(date_format=date_format, starting_side=starting_side)
+                metadata, calendar = form.generate_calendar(date_format=date_format, starting_side=starting_side)
+                st.dataframe(metadata)
+                st.dataframe(calendar)
+
+        if st.button("Export to Excel"):
+            if not form.validate_fields():
+                st.warning("Please fill out all fields properly before generating the calendar.")
+            else:
+                date_format = get_date_format(date_format)
+                metadata, calendar = form.generate_calendar(date_format=date_format, starting_side=starting_side)
+                export_to_excel(metadata_df=metadata, calendar_df=calendar)
 
 # Run the app
 main()
