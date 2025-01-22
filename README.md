@@ -3,13 +3,15 @@
 This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions or contribute. 
 
 ### Pictures
+<img width="960" alt="calgen1" src="https://github.com/user-attachments/assets/d2fb1e53-0fb9-4bb3-8016-f54123b7ee6c" />
+<img width="960" alt="calgen2" src="https://github.com/user-attachments/assets/ab1a1978-4052-47af-bdf5-0cd02910b215" />
 
-![Picture of Home Page](https://imgur.com/fdWayXX)
-![Picture of Generated Calendar](https://imgur.com/ONDX3aG)
 What exporting to Excel looks like:
-![Picture of Excel Sheet](https://imgur.com/pmh1RdU)
+<img width="960" alt="sheet" src="https://github.com/user-attachments/assets/33ab864e-4d2a-4cf7-91fa-a7d829fc287e" />
+
 What an event after importing the .iCal file looks like:
-![Picture of iCal Event](https://imgur.com/pmh1RdU)
+<br><img width="321" alt="icalexample" src="https://github.com/user-attachments/assets/3c1ce427-354d-42b8-9ef4-8bfbf29424e4" />
+
 
 ### Running Locally
 
