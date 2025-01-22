@@ -6,12 +6,12 @@ import pandas as pd
 class Form:
     """ A class for generating an form object in the homepage.
     """
-    def __init__(self, name=None, ester=None, interval=None, start_date=None, dose=None, dosetype=None, total_volume=None, concentration=None):
+    def __init__(self, name=None, interval=None, start_date=None, dose=None, dosetype=None, total_volume=None, concentration=None): #ester=None,
         """The Form object's attributes for generating a calendar.
 
         Args:
             name (str, optional): The user's name. Defaults to None.
-            ester (str, optional): The user's ester type. Defaults to None.
+            # ester (str, optional): The user's ester type. Defaults to None. // N/A for now
             interval (int): The interval in which shots need to be delivered. Defaults to None.
             start_date (str): The start date in which to generate from. Defaults to None.
             dose (int): The user's dosage amount. Defaults to None.
@@ -20,7 +20,7 @@ class Form:
             concentration (int): The user's hormone vial concentration (mg/mL). Defaults to None.
         """
         self.name = name
-        self.ester = ester
+        #self.ester = ester
         self.interval = interval
         self.start_date = start_date
         self.dose = dose
@@ -35,7 +35,7 @@ class Form:
             date_format (str): The date format for generating the input form. 
         """
         self.name = st.text_input("Your Name", value=self.name)
-        self.ester = st.text_input("Your [Ester](https://en.wikipedia.org/wiki/Steroid_ester)", value=self.ester)
+        #self.ester = st.text_input("Your HRT", value=self.ester) #for now, commented out because it doesn't do anything in the calculation ultimately
         self.interval = st.number_input("Dose Interval (days)", min_value=1, format="%d", value=self.interval)
         self.start_date = st.date_input("Start Date", value=self.start_date, format=date_format)
 
@@ -62,7 +62,7 @@ class Form:
             doseml = self.dose
         metadata = {
             "Name": self.name,
-            "Ester": self.ester,
+            #"Ester": self.ester,
             "Generation Date": f"{date.today().strftime(date_format)}",
             "Dose (mg)": f"{dosemg} mg",
             "Dose (mL)": f"{doseml} mL",

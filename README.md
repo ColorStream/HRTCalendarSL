@@ -11,7 +11,7 @@ What exporting to Excel looks like:
 
 What an event after importing the .iCal file looks like:
 <br><img width="321" alt="icalexample" src="https://github.com/user-attachments/assets/3c1ce427-354d-42b8-9ef4-8bfbf29424e4" />
-
+(Note: At the moment, I have not implemented the calendar as connected reoccurring events. Events added by the iCal import will all be listed as independent events. I plan on integrating recurring iCal events eventually.)
 
 ### Running Locally
 
@@ -36,7 +36,7 @@ python -m venv .venv
 ```
 
 4. Load the virtual environment.
-    - On Windows Powershell: `.venv\Scripts\activate.ps1`
+    - On Windows Powershell: `.venv/Scripts/activate.ps1`
     - On Linux and Git Bash: `source venv/bin/activate`
 
 5. Run `pip install -r requirements.txt`.
