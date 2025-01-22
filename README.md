@@ -1,6 +1,15 @@
 # HRT Calendar Streamlit App
 
-This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions or contribute. This will be hosted using Streamlit Community Cloud when I'm done, hopefully. 
+This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions or contribute. 
+
+### Pictures
+
+![Picture of Home Page](https://imgur.com/fdWayXX)
+![Picture of Generated Calendar](https://imgur.com/ONDX3aG)
+What exporting to Excel looks like:
+![Picture of Excel Sheet](https://imgur.com/pmh1RdU)
+What an event after importing the .iCal file looks like:
+![Picture of iCal Event](https://imgur.com/pmh1RdU)
 
 ### Running Locally
 
