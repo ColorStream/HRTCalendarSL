@@ -1,5 +1,36 @@
-This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions. This will be hosted using Streamlit Community Cloud when I'm done, hopefully. 
+# HRT Calendar Streamlit App
 
+This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions or contribute. This will be hosted using Streamlit Community Cloud when I'm done, hopefully. 
+
+### Running Locally
+
+If you'd like to run locally, here's a quick run through. You only need Python pre-installed.
+
+1. Fork/clone/download this repository.
+
+```
+git clone https://github.com/ColorStream/HRTCalendarSL.git
+```
+
+2. Navigate to the directory.
+
+```
+cd HRTCalendarSL
+```
+
+3. Create a virtual environment for this project. This example uses `.venv` as the name.
+
+```
+python -m venv .venv
+```
+
+4. Load the virtual environment.
+    - On Windows Powershell: `.venv\Scripts\activate.ps1`
+    - On Linux and Git Bash: `source venv/bin/activate`
+
+5. Run `pip install -r requirements.txt`.
+
+6. Then run `streamlit run app.py`.
 
 This project is licensed under the terms of the GNU General Public License v3. See the LICENSE file for more details.
 
