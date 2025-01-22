@@ -102,7 +102,7 @@ class Form:
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-import os
+import io
 
 def export_to_excel(metadata_df, calendar_df):
         if metadata_df is None or calendar_df is None:
@@ -113,6 +113,7 @@ def export_to_excel(metadata_df, calendar_df):
         ws = wb.active
 
         try:
+            output = io.BytesIO() # have to store in memory, unfortunately
             # write metadata
             for r_idx, row in enumerate(dataframe_to_rows(metadata_df, index=False, header=True), 1):
                 for c_idx, value in enumerate(row, 1):
@@ -145,16 +146,11 @@ def export_to_excel(metadata_df, calendar_df):
                 adjusted_width = max_length + 2  # padding
                 ws.column_dimensions[column].width = adjusted_width
 
-            # set filename according to metadata
-            filename = f"{metadata_df.iloc[0, 0]}_hrtcalendar.xlsx"
-
             # save to downloads
-            download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-            output_file = os.path.join(download_folder, filename)
-
-            wb.save(output_file)
+            wb.save(output)
+            output.seek(0)  # Move the cursor to the start of the stream
             
-            return f"Excel sheet has been saved as {filename} to: {output_file}"
+            return output
 
         except PermissionError:
             return "Error: Unable to save the file. Please close any open copies of the file and try again."
@@ -164,12 +160,13 @@ def export_to_excel(metadata_df, calendar_df):
 from icalendar import Calendar, Event
 from datetime import datetime
 
-def export_to_calendar(calendar_df, filename, warn_secondtolast=False):
+def export_to_ical(calendar_df, warn_secondtolast=False):
     if calendar_df is None:
         st.error("Calendar data is not provided.")
         return
 
     try:
+        output = io.BytesIO() 
         cal = Calendar()
         cal.add('prodid', '-//HRT Calendar//mxm.dk//')
         cal.add('version', '2.0')
@@ -205,14 +202,12 @@ def export_to_calendar(calendar_df, filename, warn_secondtolast=False):
             cal.add_component(event)
 
         # save to downloads folder
-        download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-        output_file = os.path.join(download_folder, filename)
+        output = io.BytesIO()
+        output.write(cal.to_ical())
+        output.seek(0)  # Move the cursor to the start of the stream
 
-        with open(output_file, 'wb') as f:
-            f.write(cal.to_ical())
-
-        return f"iCal file has been saved as {filename} to: {output_file}"
-
+        return output
+    
     except PermissionError:
         return "Error: Unable to save the file. Please close any open copies of the file and try again."
     except Exception as e:
@@ -231,10 +226,12 @@ def generate_form(dosetype, date_format, starting_side, warn_secondtolast):
     st.title(f"Calendar By Dosage in {dosetype}")
     form = Form(dosetype=dosetype)
     form.create_inputs(date_format=date_format)
+
+    # All the stuff I have to initialize....... I feel like this is bad practice...
     invalidForm = False
     dataframe_display = ""
-    excelmessage = ""
-    icalmessage = ""
+    exceloutput = ""
+    icaloutput = ""
 
     col1_, col2_, col3_ = st.columns([2,1,2])
     with col1_:
@@ -252,7 +249,7 @@ def generate_form(dosetype, date_format, starting_side, warn_secondtolast):
             else:
                 date_format = get_date_format(date_format)
                 metadata, calendar = form.generate_calendar(date_format=date_format, starting_side=starting_side)
-                excelmessage = export_to_excel(metadata_df=metadata, calendar_df=calendar)
+                exceloutput = export_to_excel(metadata_df=metadata, calendar_df=calendar)
                 
     with col3_:
         if st.button("Export to iCal"):
@@ -261,7 +258,7 @@ def generate_form(dosetype, date_format, starting_side, warn_secondtolast):
             else:
                 warn_secondtolast = False if warn_secondtolast == "No" else True
                 metadata, calendar = form.generate_calendar(date_format="%Y-%m-%d", starting_side=starting_side)
-                icalmessage = export_to_calendar(calendar_df=calendar, filename=f"{form.name}_hrt_calendar.ical", warn_secondtolast=warn_secondtolast)
+                icaloutput = export_to_ical(calendar_df=calendar, warn_secondtolast=warn_secondtolast)
 
     # Moving things below the columns because it's ugly within them
     if invalidForm:
@@ -271,18 +268,33 @@ def generate_form(dosetype, date_format, starting_side, warn_secondtolast):
         st.dataframe(dataframe_display[0])
         st.dataframe(dataframe_display[1])
     
-    if excelmessage:
-        if "Error" in excelmessage or "unexpected" in excelmessage:
-            st.error(excelmessage)  
+    if exceloutput:
+        if "Error" in exceloutput or "unexpected" in exceloutput:
+            st.error(exceloutput)  
         else:
-            st.success(excelmessage) 
-    if icalmessage:
-        if "Error" in icalmessage or "unexpected" in icalmessage:
-            st.error(icalmessage)
+            st.success("File generated.") 
+            st.download_button(
+            label="Download Excel",
+            data=exceloutput,
+            file_name=f"{form.name}_hrt_calendar.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    if icaloutput:
+        if "Error" in icaloutput or "unexpected" in icaloutput:
+            st.error(icaloutput)
         else:
-            st.success(icalmessage)
+            st.success("File generated.") 
+            st.download_button(
+            label="Download iCal",
+            data=icaloutput,
+            file_name=f"{form.name}_hrt_calendar.ics",
+            mime="text/calendar"
+            )
 
 def main():
+    st.set_page_config(page_title="HRT Calendar Generator", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
+
+    # markdown for the button columns
     st.markdown("""
             <style>
                 div[data-testid="column"] {
@@ -300,7 +312,7 @@ def main():
     date_format = st.sidebar.radio("Choose Date Format", ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY/MM/DD"]) #apologies for americanizing this. 
     starting_side = st.sidebar.radio("Choose Starting Side", ["Left", "Right"])
     warn_secondtolast = st.sidebar.radio("Warning at Second to Last Dose? (For ICAL)", ["No", "Yes"])
-    st.sidebar.write("Newbie to injectable hormones? [Check out this resource.]()")
+    st.sidebar.write("Newbie to injectable hormones? [Check out this resource.](https://stainedglasswoman.substack.com/p/what-to-expect-when-youre-injecting)")
     st.sidebar.divider()
     st.sidebar.caption("[Github Repo](https://github.com/ColorStream/HRTCalendarSL)")
 
