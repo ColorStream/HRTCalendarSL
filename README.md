@@ -2,6 +2,8 @@
 
 This is a fork of [S4r4h-O's HRT Calendar](https://github.com/S4r4h-O/HRT-Calendar-Calend-rio-de-TH), which works offline. I wanted to make a version using [Streamlit](https://streamlit.io/) just so I could host it on the web. Feel free to suggest additions or contribute. 
 
+Access it on Streamlit Community Cloud here: https://hrtcalendar.streamlit.app/
+
 ### Pictures
 <img width="960" alt="calgen1" src="https://github.com/user-attachments/assets/d2fb1e53-0fb9-4bb3-8016-f54123b7ee6c" />
 <img width="960" alt="calgen2" src="https://github.com/user-attachments/assets/ab1a1978-4052-47af-bdf5-0cd02910b215" />
