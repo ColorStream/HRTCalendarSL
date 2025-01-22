@@ -10,7 +10,7 @@ What exporting to Excel looks like:
 <img width="960" alt="sheet" src="https://github.com/user-attachments/assets/33ab864e-4d2a-4cf7-91fa-a7d829fc287e" />
 
 What an event after importing the .iCal file looks like:
-<img width="321" alt="icalexample" src="https://github.com/user-attachments/assets/3c1ce427-354d-42b8-9ef4-8bfbf29424e4" />
+<br><img width="321" alt="icalexample" src="https://github.com/user-attachments/assets/3c1ce427-354d-42b8-9ef4-8bfbf29424e4" />
 
 
 ### Running Locally
